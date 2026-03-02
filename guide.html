@@ -159,6 +159,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
         .app-card .card-img-wrapper {
@@ -290,6 +291,24 @@
 
         .img-zoom {
             cursor: zoom-in;
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.65);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
     </style>
 </head>
@@ -478,6 +497,16 @@
     </div>
 
     <script>
+        // Add zoom indicator icons dynamically
+        document.querySelectorAll('.card-img-wrapper').forEach(wrapper => {
+            if (wrapper.querySelector('.img-zoom')) {
+                const indicator = document.createElement('div');
+                indicator.className = 'zoom-indicator';
+                indicator.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i>';
+                wrapper.appendChild(indicator);
+            }
+        });
+
         // Tab switching logic
         const tabs = document.querySelectorAll('.tab');
         const sections = document.querySelectorAll('.section');
