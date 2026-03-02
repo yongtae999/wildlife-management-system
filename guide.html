@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>야생생물관리시스템 사용자 가이드</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #60ad5e;
+            --primary-dark: #005005;
+            --secondary: #0277bd;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .header-title i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            background-color: var(--card-bg);
+            padding: 0 2rem;
+            display: flex;
+            gap: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 1rem 0;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Grid Layouts */
+        .grid-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .app-grid {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .web-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* Card Style */
+        .guide-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .guide-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img-wrapper {
+            width: 100%;
+            background-color: #eaeaea;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-card .card-img-wrapper {
+            height: 500px;
+            /* Mobile screenshots usually vertical */
+            padding: 1rem;
+            background-color: #333;
+            /* Dark bg for app screens */
+        }
+
+        .app-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .web-card .card-img-wrapper {
+            height: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .web-card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .detail-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .detail-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-list li::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-size: 0.8rem;
+            top: 2px;
+        }
+
+        /* Interactive Image Viewer (Modal) */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .modal-img {
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 8px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #ff5252;
+        }
+
+        .modal-caption {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .img-zoom {
+            cursor: zoom-in;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-title">
+            <img src="./assets/images/logo.png" alt="야생생물관리협회 로고"
+                style="height: 40px; margin-right: 10px; border-radius: 4px;">
+            야생생물시스템 공식 가이드
+        </div>
+        <div>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">최종 업데이트: 2026.03.02</span>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <div class="tab active" data-target="app-guide">
+            <i class="fa-solid fa-mobile-screen-button"></i> 엽사용 앱 (App) 가이드
+        </div>
+        <div class="tab" data-target="web-guide">
+            <i class="fa-solid fa-laptop"></i> 관리자용 웹 (Web) 가이드
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- App Guide Section -->
+        <div id="app-guide" class="section active">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-mobile-screen-button"></i> 엽사용 모바일 앱 설명서</h2>
+                <p style="color: var(--text-muted); margin-top: 10px;">현장에서 포획 활동을 진행하는 엽사님들을 위한 전용 애플리케이션 사용 가이드입니다.
+                </p>
+            </div>
+
+            <div class="grid-container app-grid">
+
+                <!-- App Card 1 -->
+                <div class="guide-card app-card">
+                    <div class="card-img-wrapper">
+                        <!-- We will construct actual system paths here -->
+                        <img src="./assets/images/app_main.png" alt="앱 초기화면" class="img-zoom"
+                            onclick="openModal(this.src, '앱 초기화면')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">STEP 1</span>
+                        <h3 class="card-title">앱 실행 및 초기화면</h3>
+                        <p class="card-desc">앱을 처음 실행했을 때 나타나는 초기화면입니다.</p>
+                        <ul class="detail-list">
+                            <li>GPS 위치권한을 반드시 '항상허용'으로 설정해야 정상 작동합니다.</li>
+                            <li>첫 로그인 시 휴대폰 본인인증이 진행됩니다.</li>
+                            <li>중앙의 큰 회색버튼을 눌러 포획활동을 시작합니다.</li>
+                            <li>경보확인 버튼을 누르면 위험알림이 꺼집니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- App Card 2 -->
+                <div class="guide-card app-card">
+                    <div class="card-img-wrapper">
+                        <img src="./assets/images/app_step2.png" alt="사진 전송 화면" class="img-zoom"
+                            onclick="openModal(this.src, '포획물 사진 전송')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">STEP 2</span>
+                        <h3 class="card-title">목표물 포획 및 실적 등록</h3>
+                        <p class="card-desc">유해조수 포획 후 즉시 현장에서 사진을 찍어 전송하는 화면입니다.</p>
+                        <ul class="detail-list">
+                            <li>포획물이 명확히 보이도록 가이드라인에 맞춰 촬영하세요(2장 이상)</li>
+                            <li>현재 좌표와 시간이 사진에 자동 각인(위변조 방지)됩니다.</li>
+                            <li>암수, 포획도구, 처리방법, 무게 등을 맞게 클릭하고 등록하기 버튼을 누르면 실시간으로 전송됩니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- App Card 3 -->
+                <div class="guide-card app-card">
+                    <div class="card-img-wrapper">
+                        <img src="./assets/images/app_step3.png" alt="추가 사진 전송 화면" class="img-zoom"
+                            onclick="openModal(this.src, '추가 포획물 사진 확인')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">STEP 3</span>
+                        <h3 class="card-title">포획& 처리현황 메뉴</h3>
+                        <p class="card-desc">자신의 포획데이터를 확인하고 사진을 추가할 수 있습니다.</p>
+                        <ul class="detail-list">
+                            <li>현황 탭에서는 자신의 포획 현황을 한눈에 볼 수 있고 사진을 추가할 수 있습니다.</li>
+                            <li>미등록 탭을 클릭하면 임시저장되었던 포획데이터를 확인하고 재전송 할 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Web Admin Guide Section -->
+        <div id="web-guide" class="section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-laptop"></i> 관리자(공무원/협회) 웹 페이지 설명서</h2>
+                <p style="color: var(--text-muted); margin-top: 10px;">스마트폰 앱에서 올라온 데이터를 확인하고, 승인/반려 및 통계를 관리하는 PC 전용
+                    대시보드입니다.</p>
+            </div>
+
+            <div class="grid-container web-grid">
+
+                <!-- Web Card 1 -->
+                <div class="guide-card web-card">
+                    <div class="card-img-wrapper">
+                        <!-- 로그인 화면 이미지 (추후 실제 파일명으로 변경 필요 시 안내 요망) -->
+                        <img src="./assets/images/web_menu1.jpg" alt="관리자 로그인" class="img-zoom"
+                            onclick="openModal(this.src, '관리자 페이지 로그인')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">MENU 01</span>
+                        <h3 class="card-title">관리자 접속</h3>
+                        <p class="card-desc">담당자 전화번호와 부여받은 식별 번호(비밀번호)를 입력하여 관리자 계정으로 접속합니다.</p>
+                        <!-- 체크리스트가 필요하다면 여기에 ul 태그 추가 가능 -->
+                    </div>
+                </div>
+
+                <!-- Web Card 2 -->
+                <div class="guide-card web-card">
+                    <div class="card-img-wrapper">
+                        <!-- 대시보드 화면 이미지 -->
+                        <img src="./assets/images/web_menu2.jpg" alt="대시보드 개요" class="img-zoom"
+                            onclick="openModal(this.src, '대시보드 개요')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">MENU 02</span>
+                        <h3 class="card-title">대시보드 개요</h3>
+                        <p class="card-desc">첫 화면에서 관내 실시간 포획 현황을 지도로 한눈에 파악할 수 있습니다.</p>
+                        <ul class="detail-list">
+                            <li>오늘 접수된 미승인 포획건, 월별 포획 추이 등이 요약 카드로 제공됩니다.</li>
+                            <li>상단 탭을 클릭하여 포획내역, 사용자등록 등 다른 메뉴로 이동합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Web Card 3 (기존 Menu 02) -->
+                <div class="guide-card web-card">
+                    <div class="card-img-wrapper">
+                        <!-- 포획내역 화면 이미지 -->
+                        <img src="./assets/images/web_menu3.jpg" alt="포획 실적 승인" class="img-zoom"
+                            onclick="openModal(this.src, '포획 실적 심사 및 승인')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">MENU 03</span>
+                        <h3 class="card-title">포획 신고내역 상세 조회</h3>
+                        <p class="card-desc">엽사가 현장에서 전송한 포획데이터를 종합적으로 검토하고 승인 여부를 결정합니다.</p>
+                        <ul class="detail-list">
+                            <li>목록을 클릭하면 상세 내용이 보여지며 첨부 이미지를 확대 및 다운로드 할 수 있습니다.</li>
+                            <li>중복으로 신고되었거나 포획 내용이 문제가 있을 경우 반려처리 합니다.</li>
+                            <li>이상이 없을 경우 지급조서 내보내기 기능을 통해 보상금 지급조서를 생성합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Web Card 4 (기존 Menu 03) -->
+                <div class="guide-card web-card">
+                    <div class="card-img-wrapper">
+                        <img src="./assets/images/web_menu4.jpg" alt="통계 관리" class="img-zoom"
+                            onclick="openModal(this.src, '지역별/개체별 통계 현황')">
+                    </div>
+                    <div class="card-content">
+                        <span class="step-badge">MENU 04</span>
+                        <h3 class="card-title">포상금 지급조서 내보내기 기능(Excel)</h3>
+                        <p class="card-desc">승인한 건에 대해 포상금 지급조서를 생성하는 기능입니다.</p>
+                        <ul class="detail-list">
+                            <li>조회 기간 및 포획 대상 개체별 필터링이 가능합니다.</li>
+                            <li>하단 우측의 [내보내기] 버튼을 누르면 환경부 제출용 문서를 다운 및 출력할 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal()"></i>
+        <img src="" alt="Enlarged Image" class="modal-img" id="modalImage">
+        <div class="modal-caption" id="modalCaption">이미지 설명</div>
+    </div>
+
+    <script>
+        // Tab switching logic
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('.section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active classes
+                tabs.forEach(t => t.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                // Add active classes to clicked tab and corresponding section
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // Modal logic
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalCap = document.getElementById('modalCaption');
+
+        function openModal(src, caption) {
+            // Check if mobile (width <= 768px), open in new tab for native pinch-zoom
+            if (window.innerWidth <= 768) {
+                window.open(src, '_blank');
+                return;
+            }
+            modal.classList.add('active');
+            modalImg.src = src;
+            modalCap.textContent = caption;
+            document.body.style.overflow = 'hidden'; // prevent bg scrolling
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
