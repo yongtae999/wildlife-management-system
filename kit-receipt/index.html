@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>채혈키트 전자 인수증</title>
+    <!-- html2canvas for generating image -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #0ca678;
+            --primary-dark: #087f5b;
+            --bg: #f8f9fa;
+            --text: #212529;
+            --border: #dee2e6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        /* Mobile Form UI */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: var(--primary-dark);
+        }
+        
+        .form-group {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .form-group h3 {
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+        .form-row {
+            margin-bottom: 16px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #495057;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-secondary { background: #e9ecef; color: #212529; border: 1px solid #dee2e6; }
+        
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(12, 166, 120, 0.2);
+        }
+        .submit-btn:active { background: var(--primary-dark); }
+
+        /* Modal UI */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.6);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin-bottom: 10px; text-align: center; color: var(--primary-dark); font-size: 20px; }
+        .signature-wrapper {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+            touch-action: none; /* Prevent scrolling while signing */
+            margin-top: 15px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 180px;
+            background: white;
+        }
+        .modal-actions {
+            display: flex; gap: 10px; margin-top: 20px; justify-content: space-between;
+        }
+        .modal-actions .btn { flex: 1; padding: 14px 0; font-size: 15px; }
+
+        /* Output View (Hidden initially) */
+        #output-container {
+            display: none;
+            padding: 20px;
+            text-align: center;
+        }
+        #output-image {
+            max-width: 100%;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn-share { background: #FEE500; color: #000; } /* Kakao Yellow */
+        .btn-restart { background: #868E96; }
+
+        /* Document Template (Used for image generation, hidden from normal view) */
+        .receipt-template-wrapper {
+            position: absolute;
+            left: -9999px; /* Hide off-screen */
+            top: 0;
+            background: white;
+        }
+        .receipt-template {
+            width: 794px; /* A4 width at 96dpi */
+            height: 1123px; /* A4 height */
+            background: white;
+            padding: 80px;
+            font-family: 'Malgun Gothic', "맑은 고딕", sans-serif;
+            color: black;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 60px;
+            margin-top: 20px;
+        }
+        .receipt-header h1 { font-size: 56px; font-weight: bold; letter-spacing: 20px; border-bottom: 2px solid #000; display: inline-block; padding-bottom: 10px; padding-left: 20px; }
+        
+        .receipt-recipient {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+        
+        .receipt-statement {
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            margin: 60px 0;
+        }
+        
+        .receipt-sign {
+            text-align: right;
+            font-size: 22px;
+            margin-bottom: 80px;
+        }
+        .receipt-sign .sign-row {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .receipt-sign .sign-label {
+            width: 140px;
+            text-align: left;
+        }
+        .receipt-sign .sign-value {
+            display: inline-block;
+            width: 200px;
+            text-align: left;
+            border-bottom: 1px solid #000;
+            padding-left: 10px;
+            position: relative;
+        }
+        .receipt-sign-img {
+            position: absolute;
+            right: -20px;
+            top: -40px;
+            height: 90px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 15px;
+        }
+        th { background: #f0f0f0; }
+        
+        .bottom-org {
+            position: absolute;
+            bottom: 100px;
+            width: calc(100% - 160px);
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Mobile Form View -->
+    <div class="container" id="form-container">
+        <div class="header">
+            <h1>채혈키트 전자 인수증</h1>
+            <p style="color: #868e96; font-size: 14px; margin-top: 5px;">현장에서 작성 후 이미지를 공유해 주세요.</p>
+        </div>
+        
+        <!-- 기본 정보 -->
+        <div class="form-group">
+            <h3>기본 정보</h3>
+            <div class="form-row">
+                <label>수령 일자</label>
+                <input type="date" id="dateInput">
+            </div>
+            <div class="form-row">
+                <label>인계자 (지부)</label>
+                <select id="giverInput">
+                    <option value="중앙사무국">중앙사무국</option>
+                    <option value="서울인천경기지부">서울인천경기지부</option>
+                    <option value="강원지부">강원지부</option>
+                    <option value="충북지부">충북지부</option>
+                    <option value="대전충남세종지부" selected>대전충남세종지부</option>
+                    <option value="대구경북지부">대구경북지부</option>
+                    <option value="부산울산경남지부">부산울산경남지부</option>
+                    <option value="전북지부">전북지부</option>
+                    <option value="광주전남지부">광주전남지부</option>
+                    <option value="제주지부">제주지부</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>인수자 소속 (지부/지회명)</label>
+                <input type="text" id="branchInput" placeholder="예: 대전지회 또는 강원지부">
+            </div>
+            <div class="form-row">
+                <label>인수자 성명</label>
+                <input type="text" id="nameInput" placeholder="이름을 입력하세요">
+            </div>
+        </div>
+
+        <!-- 물품 정보: 채혈키트 -->
+        <div class="form-group">
+            <h3>채혈키트</h3>
+            <div class="form-row">
+                <label>규격</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="kitSpecSelect" style="flex: 1;" onchange="toggleSpecInput('kit')">
+                        <option value="해당없음">해당없음</option>
+                        <option value="개">개</option>
+                        <option value="직접입력">직접입력...</option>
+                    </select>
+                    <input type="text" id="kitSpecInput" style="flex: 1; display: none;" placeholder="규격 입력">
+                </div>
+            </div>
+            <div class="form-row">
+                <label>수량 (개)</label>
+                <select id="kitCountInput"></select>
+            </div>
+            <div class="form-row">
+                <label>비고</label>
+                <input type="text" id="kitRemarkInput" placeholder="비고 사항을 입력하세요">
+            </div>
+        </div>
+
+        <!-- 물품 정보: 아이스박스 -->
+        <div class="form-group">
+            <h3>아이스박스</h3>
+            <div class="form-row">
+                <label>규격</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="iceboxSpecSelect" style="flex: 1;" onchange="toggleSpecInput('icebox')">
+                        <option value="해당없음">해당없음</option>
+                        <option value="개">개</option>
+                        <option value="직접입력">직접입력...</option>
+                    </select>
+                    <input type="text" id="iceboxSpecInput" style="flex: 1; display: none;" placeholder="규격 입력">
+                </div>
+            </div>
+            <div class="form-row">
+                <label>수량 (개)</label>
+                <select id="iceboxCountInput"></select>
+            </div>
+            <div class="form-row">
+                <label>비고</label>
+                <input type="text" id="iceboxRemarkInput" placeholder="비고 사항을 입력하세요">
+            </div>
+        </div>
+
+        <!-- 기타 -->
+        <div class="form-group">
+            <h3>기타 품목</h3>
+            <div class="form-row">
+                <label>기타 내역 및 비고</label>
+                <input type="text" id="etcInput" placeholder="기타 품목이나 특이사항을 입력하세요">
+            </div>
+        </div>
+
+        <!-- 서명 -->
+        <div class="form-group">
+            <div class="form-row">
+                <label>인수자 서명</label>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button type="button" class="btn btn-primary" onclick="openSigModal()">서명하기</button>
+                    <span id="sigStatus" style="color: #fa5252; font-weight: bold;">[서명 안 됨]</span>
+                </div>
+                <img id="sigPreview" src="" style="display:none; height: 60px; margin-top: 15px; border: 1px solid #dee2e6; border-radius: 8px; background: #fff; padding: 5px;">
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="generateReceipt()">인수증 생성하기</button>
+    </div>
+
+    <!-- Signature Modal -->
+    <div id="sigModal" class="modal">
+        <div class="modal-content">
+            <h3>서명 입력</h3>
+            <p style="text-align:center; font-size:14px; color:#666; margin-bottom:5px;">아래 영역에 손가락으로 서명해 주세요.</p>
+            <div class="signature-wrapper">
+                <canvas id="sigCanvas"></canvas>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="clearSignature()">다시 쓰기</button>
+                <button class="btn btn-primary" onclick="saveSignature()">적용하기</button>
+                <button class="btn btn-secondary" onclick="closeSigModal()" style="flex: 0.5;">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Output View -->
+    <div id="output-container">
+        <h2>인수증이 생성되었습니다!</h2>
+        <p style="margin-bottom: 20px; color: #666;">아래 이미지를 꾹 눌러 저장하거나 공유버튼을 누르세요.</p>
+        <img id="output-image" src="" alt="생성된 인수증">
+        <div class="btn-group">
+            <button class="btn btn-share" onclick="shareImage()">카카오톡/문자 공유</button>
+            <button class="btn btn-restart" onclick="location.reload()">새로 작성</button>
+        </div>
+    </div>
+
+    <!-- 3. Hidden Print Template (A4 Size) -->
+    <div class="receipt-template-wrapper">
+        <div class="receipt-template" id="receiptTemplate">
+            <div class="receipt-header">
+                <h1>인 수 증</h1>
+            </div>
+            
+            <div class="receipt-recipient" id="tplRecipientOrg">
+                야생생물관리협회 OOO지부 귀하
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">품 명</th>
+                        <th style="width: 25%;">규 격</th>
+                        <th style="width: 20%;">수 량</th>
+                        <th style="width: 30%;">비 고</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>채혈키트</td>
+                        <td id="tplKitSpec">-</td>
+                        <td id="tplKit">0</td>
+                        <td id="tplKitRemark"></td>
+                    </tr>
+                    <tr>
+                        <td>아이스박스</td>
+                        <td id="tplIceboxSpec">-</td>
+                        <td id="tplIcebox">0</td>
+                        <td id="tplIceboxRemark"></td>
+                    </tr>
+                    <tr>
+                        <td>기타</td>
+                        <td id="tplEtc" colspan="3" style="text-align: left;"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="receipt-statement">
+                하기 물품을 정히 인수합니다.
+            </div>
+
+            <div style="text-align: right; font-size: 22px; margin-bottom: 40px;" id="tplDate">
+                2026년 00월 00일
+            </div>
+
+            <div class="receipt-sign">
+                <div class="sign-row">
+                    <span class="sign-label">인수자 소속 :</span>
+                    <span class="sign-value" id="tplBranch"></span>
+                </div>
+                <div class="sign-row">
+                    <span class="sign-label">인수자 성명 :</span>
+                    <span class="sign-value">
+                        <span id="tplName"></span>
+                        <span style="position: absolute; right: 10px;">(인)</span>
+                        <img id="tplSign" class="receipt-sign-img" src="" style="display: none;">
+                    </span>
+                </div>
+            </div>
+
+            <div class="bottom-org" id="tplBottomOrgName">
+                야생생물관리협회 OOO지부
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init 0~50 dropdowns
+        const kitCountInput = document.getElementById('kitCountInput');
+        const iceboxCountInput = document.getElementById('iceboxCountInput');
+        for(let i=0; i<=50; i++) {
+            kitCountInput.add(new Option(`${i}`, i));
+            iceboxCountInput.add(new Option(`${i}`, i));
+        }
+
+        // Toggle custom spec input
+        function toggleSpecInput(type) {
+            const select = document.getElementById(`${type}SpecSelect`);
+            const input = document.getElementById(`${type}SpecInput`);
+            if (select.value === '직접입력') {
+                input.style.display = 'block';
+                input.focus();
+            } else {
+                input.style.display = 'none';
+            }
+        }
+
+        // Set today's date as default
+        document.getElementById('dateInput').valueAsDate = new Date();
+
+        // Signature Modal & Canvas Logic
+        const sigModal = document.getElementById('sigModal');
+        const sigStatus = document.getElementById('sigStatus');
+        const sigPreview = document.getElementById('sigPreview');
+        let signatureApplied = false;
+
+        const canvas = document.getElementById('sigCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        
+        function initCanvasSize() {
+            // Setup canvas width based on modal content width
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width > 0 && canvas.width !== rect.width) {
+                canvas.width = rect.width;
+                canvas.height = 180;
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = '#000';
+            }
+        }
+
+        function openSigModal() {
+            sigModal.style.display = 'flex';
+            setTimeout(initCanvasSize, 50); // slight delay to allow flex layout to compute
+        }
+
+        function closeSigModal() {
+            sigModal.style.display = 'none';
+        }
+
+        function saveSignature() {
+            if (isCanvasBlank(canvas)) {
+                alert("서명을 먼저 입력해주세요.");
+                return;
+            }
+            signatureApplied = true;
+            sigStatus.innerText = "[서명 완료]";
+            sigStatus.style.color = "var(--primary)";
+            sigPreview.src = canvas.toDataURL('image/png');
+            sigPreview.style.display = "block";
+            closeSigModal();
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function isCanvasBlank(canvas) {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            return canvas.toDataURL() === blank.toDataURL();
+        }
+
+        // Generate Receipt
+        async function generateReceipt() {
+            const dateVal = document.getElementById('dateInput').value;
+            const giverVal = document.getElementById('giverInput').value;
+            const branchVal = document.getElementById('branchInput').value;
+            const nameVal = document.getElementById('nameInput').value;
+            
+            if (!branchVal || !nameVal) {
+                alert("인수자 소속과 성명을 입력해주세요.");
+                return;
+            }
+            if (!signatureApplied) {
+                alert("서명하기 버튼을 눌러 서명을 진행해 주세요.");
+                return;
+            }
+
+            // Parse Date
+            const d = new Date(dateVal);
+            document.getElementById('tplDate').innerText = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+            
+            // Org Names
+            const orgName = `야생생물관리협회 ${giverVal}`;
+            document.getElementById('tplRecipientOrg').innerText = `${orgName} 귀하`;
+            document.getElementById('tplBottomOrgName').innerText = orgName;
+            
+            // Signer Info
+            document.getElementById('tplBranch').innerText = branchVal;
+            document.getElementById('tplName').innerText = nameVal;
+
+            // Specs
+            let kitSpec = document.getElementById('kitSpecSelect').value;
+            if (kitSpec === '직접입력') kitSpec = document.getElementById('kitSpecInput').value;
+            if (kitSpec === '해당없음') kitSpec = '-';
+            document.getElementById('tplKitSpec').innerText = kitSpec;
+
+            let iceboxSpec = document.getElementById('iceboxSpecSelect').value;
+            if (iceboxSpec === '직접입력') iceboxSpec = document.getElementById('iceboxSpecInput').value;
+            if (iceboxSpec === '해당없음') iceboxSpec = '-';
+            document.getElementById('tplIceboxSpec').innerText = iceboxSpec;
+
+            // Counts & Remarks
+            document.getElementById('tplKit').innerText = document.getElementById('kitCountInput').value;
+            document.getElementById('tplKitRemark').innerText = document.getElementById('kitRemarkInput').value;
+            
+            document.getElementById('tplIcebox').innerText = document.getElementById('iceboxCountInput').value;
+            document.getElementById('tplIceboxRemark').innerText = document.getElementById('iceboxRemarkInput').value;
+            
+            document.getElementById('tplEtc').innerText = document.getElementById('etcInput').value;
+
+            // Set Signature Image
+            const signImg = document.getElementById('tplSign');
+            signImg.src = canvas.toDataURL('image/png');
+            signImg.style.display = 'block';
+
+            // Show loading state
+            const btn = document.querySelector('.submit-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "생성 중...";
+            btn.disabled = true;
+
+            try {
+                // Generate Image from hidden template
+                const template = document.getElementById('receiptTemplate');
+                const canvasRendered = await html2canvas(template, {
+                    scale: 2, // High resolution
+                    useCORS: true,
+                    backgroundColor: "#ffffff"
+                });
+
+                const imgData = canvasRendered.toDataURL('image/jpeg', 0.9);
+                
+                // Show output view
+                document.getElementById('output-image').src = imgData;
+                document.getElementById('form-container').style.display = 'none';
+                document.getElementById('output-container').style.display = 'block';
+                window.scrollTo(0, 0);
+
+            } catch (err) {
+                console.error("Error generating receipt", err);
+                alert("인수증 생성 중 오류가 발생했습니다.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Share API
+        async function shareImage() {
+            const imgEl = document.getElementById('output-image');
+            try {
+                const response = await fetch(imgEl.src);
+                const blob = await response.blob();
+                const file = new File([blob], '인수증.jpg', { type: 'image/jpeg' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: '채혈키트 인수증',
+                        files: [file]
+                    });
+                } else {
+                    alert('현재 브라우저에서는 공유 기능을 지원하지 않습니다. 이미지를 꾹 눌러서 저장해주세요.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('공유 중 오류가 발생했습니다. 이미지를 꾹 눌러서 저장해주세요.');
+            }
+        }
+    </script>
+</body>
+</html>
