@@ -166,8 +166,9 @@
             gap: 10px;
             justify-content: center;
         }
+        .btn-download { background: #4C6EF5; color: white; } /* Blue for Download */
         .btn-share { background: #FEE500; color: #000; } /* Kakao Yellow */
-        .btn-restart { background: #868E96; }
+        .btn-restart { background: #868E96; color: white; }
 
         /* Document Template (Used for image generation, hidden from normal view) */
         .receipt-template-wrapper {
@@ -393,11 +394,14 @@
     <!-- 2. Output View -->
     <div id="output-container">
         <h2>인수증이 생성되었습니다!</h2>
-        <p style="margin-bottom: 20px; color: #666;">아래 이미지를 꾹 눌러 저장하거나 공유버튼을 누르세요.</p>
+        <p style="margin-bottom: 20px; color: #666;">사진첩에 저장하거나 다른 앱으로 공유하세요.</p>
         <img id="output-image" src="" alt="생성된 인수증">
-        <div class="btn-group">
-            <button class="btn btn-share" onclick="shareImage()">카카오톡/문자 공유</button>
-            <button class="btn btn-restart" onclick="location.reload()">새로 작성</button>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto;">
+            <button class="btn btn-download" onclick="downloadImage()">사진첩에 저장 (다운로드)</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-share" style="flex: 1;" onclick="shareImage()">다른 앱으로 공유</button>
+                <button class="btn btn-restart" style="flex: 1;" onclick="location.reload()">새로 작성</button>
+            </div>
         </div>
     </div>
 
@@ -667,6 +671,23 @@
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
+        }
+
+        // Download Image
+        function downloadImage() {
+            const imgEl = document.getElementById('output-image');
+            const link = document.createElement('a');
+            link.href = imgEl.src;
+            
+            const today = new Date();
+            const dateStr = today.getFullYear().toString() + 
+                            (today.getMonth() + 1).toString().padStart(2, '0') + 
+                            today.getDate().toString().padStart(2, '0');
+                            
+            link.download = `채혈키트_인수증_${dateStr}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // Share API
