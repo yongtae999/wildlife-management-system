@@ -307,6 +307,14 @@
         <div class="form-group">
             <h3>채혈키트</h3>
             <div class="form-row">
+                <label>키트 종류</label>
+                <select id="kitTypeSelect">
+                    <option value="한돈">한돈</option>
+                    <option value="CWD">CWD</option>
+                    <option value="SFTS">SFTS</option>
+                </select>
+            </div>
+            <div class="form-row">
                 <label>규격</label>
                 <div style="display: flex; gap: 8px;">
                     <select id="kitSpecSelect" style="flex: 1;" onchange="toggleSpecInput('kit')">
@@ -425,7 +433,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>채혈키트</td>
+                        <td id="tplKitName">채혈키트</td>
                         <td id="tplKitSpec">-</td>
                         <td id="tplKit">0</td>
                         <td id="tplKitRemark"></td>
@@ -615,6 +623,9 @@
             document.getElementById('tplName').innerText = nameVal;
 
             // Specs
+            const kitType = document.getElementById('kitTypeSelect').value;
+            document.getElementById('tplKitName').innerHTML = `채혈키트<br><span style="font-size:16px; font-weight:normal;">(${kitType})</span>`;
+
             let kitSpec = document.getElementById('kitSpecSelect').value;
             if (kitSpec === '직접입력') kitSpec = document.getElementById('kitSpecInput').value;
             if (kitSpec === '해당없음') kitSpec = '-';
